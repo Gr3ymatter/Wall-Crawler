@@ -1,0 +1,130 @@
+
+
+#include <Servo.h>
+ 
+// Initializing and declaring sensor pins.
+// These correspond to analog sensor pins.
+int leftSensor = 0;
+int rightSensor = 1;
+ 
+// Initializing sensor thresholds
+int leftThreshold = 0;
+int rightThreshold = 0;
+ 
+// Defining Servos
+Servo leftServo;
+Servo rightServo;
+ 
+// Initializing sensor reading variables
+// These variables will be used to compare against thresholds.
+int leftSensorReading = 0;
+int rightSensorReading = 0;
+ 
+void setup(){
+ 
+ // Initializing Serial for debugging.  
+ Serial.begin(9600);
+ 
+ // Calibrate the sensors.
+ calibrate();
+ 
+}
+ 
+void loop(){
+ 
+ // Take sensor readings.
+ leftSensorReading = analogRead(leftSensor);
+ rightSensorReading = analogRead(rightSensor);
+ 
+ // Print out sensor readings
+ Serial.print("leftSensorReading: ");
+ Serial.println(leftSensorReading);
+ 
+ Serial.print("rightSensorReading: ");
+ Serial.println(rightSensorReading);
+  
+  
+ // if conditional to turn motor on when sensor
+ //  is crossing a line.
+ 
+ forward();
+ 
+ 
+ if(leftSensorReading > leftThreshold || rightSensorReading > rightThreshold){
+ 
+   
+   leftServo.write(0);
+   rightServo.write(160);
+   delay(2000);
+   
+   leftServo.detach();
+   rightServo.write(160);
+   delay(1000); 
+   
+ }
+ 
+ // If the sensor is not on black line
+ // the servos stop.
+ if(leftSensorReading < leftThreshold){
+  leftServo.detach();
+  rightServo.detach(); 
+ }
+ 
+}
+ 
+// Calibration routine.
+// Takes value of sensors 5 times, averages it and then sets
+// threshold 200 ints above average.
+ 
+void calibrate(){
+ Serial.println("CALIBRATING");
+ long int val = 0;
+ for (int i = 0; i<5; i++) {
+   val += analogRead(leftSensor);
+   delay(10);
+ }
+ 
+ leftThreshold = (val /5) + 200;
+ val = 0;
+ 
+ for(int i = 0; i<5; i++){
+   val += analogRead(rightSensor);
+   delay(10);
+}
+ 
+ rightThreshold = (val/5) + 200;
+}
+ 
+// Routine to move forward
+// The idea is to move forward in small pulses
+// so that it will be easier to control when
+// the user switches modes to make this robot
+// into a line follower.
+ 
+void forward(){
+ leftServo.attach(10);
+ rightServo.attach(9);
+ 
+ for(int i = 0; i < 15; i++)
+ {
+ leftServo.write(160);
+ rightServo.write(0); 
+ }
+ delay(100);
+ 
+ leftServo.detach();
+ rightServo.detach();
+ 
+ delay(300);
+ 
+ leftServo.attach(10);
+ rightServo.attach(9);
+ 
+ 
+}
+ 
+// Routine to stop.
+void stop(){
+ leftServo.detach();
+ rightServo.detach(); 
+}
