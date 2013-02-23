@@ -53,7 +53,7 @@ void loop(){
  
  // If the sensor is not on black line
  // the servos stop.
- if(leftSensorReading < leftThreshold){
+ if(leftSensorReading < leftThreshold && rightSensorReading < rightThreshold){
   stop();
  }
  
